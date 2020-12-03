@@ -6,8 +6,7 @@ import json
 
 class APIHandler:
 	"""
-	APIHandler is the class used for communicating with Trackma to update
-	remote anime lists based on the watch command (for now).
+	The class used to communicate with Trackma.
 	"""
 	comparision = {
 		"mal_ID": "id",
@@ -23,10 +22,9 @@ class APIHandler:
 	adList = []
 	tList = []
 
-	def __init__(self, accountnum=1, sort=True):
+	def __init__(self, accountnum=1):
 		"""
-		Account number by default is 1 (which is usually MAL).
-		Set sort to false to not sort the lists.
+		Defaults to the first account.
 		"""
 		self.watch = Watcher()
 		self.accs = dict(AccountManager().get_accounts())
@@ -36,12 +34,12 @@ class APIHandler:
 		with open(self.watch.WATCH_FILE, 'r') as watch_file:
 			self.adList = list(json.load(watch_file))
 			watch_file.close()
-		if sort: self._sort_lists()
+		self._sort_lists()
 
 	def _sort_lists(self, key="mal_ID"):
 		"""
-		Sort lists for easier comparision.\n
-		Called by default on initializing the class.
+		Sorts lists for easier comparision.\n
+		Called on initializing the class.
 		Mutilates the lists.
 		"""
 		self.adList.sort(key=lambda val: val[key])
@@ -50,15 +48,23 @@ class APIHandler:
 	def _equalize_lists(self, format=False):
 		"""
 		Strips both the lists to the common categories and returns it
-		as two sublists with the AD list being first.
+		as two sublists with the animedl list being first.
 		"""
 		tempList = [[], []]
 
 		for i in range(len(self.tList)):
 			entry = [{}, {}]
 			for cat in self.comparision:
+				
 				entry[0][self.comparision[cat] if format else cat] = self.adList[i][cat]
-				entry[1][self.comparision[cat] if format else cat] = self.tList[i][self.comparision[cat]]
+
+				entry[1][
+					self.comparision[cat] if format else cat
+				] = "planned" if self.tList[i][
+					self.comparision[cat]
+				] == "plan_to_watch" else self.tList[i][
+					self.comparision[cat]
+				]
 			
 			tempList[0].append(entry[0])
 			tempList[1].append(entry[1])
@@ -66,7 +72,7 @@ class APIHandler:
 
 	def _stage_changes(self, preference=True):
 		"""
-		Returns the modified items in the AD list.\n
+		Returns the modified items in the animedl list (compares to Trackma).\n
 		Replaces it with the Trackma entry, to reverse this
 		set preference to False.
 		"""
@@ -77,18 +83,13 @@ class APIHandler:
 				tempList.append((sadList[i] if preference else stList[i]))
 		return tempList
 	
-	def add_staged_to_trackma(self, qList=None, all=False):
+	def add_staged_to_trackma(self):
 		"""
-		Updates the Trackma queue.\n
-		Provide your own list with the qList parameter.
-		Send your entire AD list by setting all to True.
+		Updates the Trackma queue.
 		"""
-		if qList:
-			pass
-		elif all:
-			pass
-		else:
-			qList = self._stage_changes()
+		qList = self._stage_changes()
+		for item in qList:
+			self.engine.get_show_info(item["mal_ID"])
 
 	"""
 	{
