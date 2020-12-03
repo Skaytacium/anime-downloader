@@ -40,7 +40,7 @@ class APIHandler:
 
 	def _sort_lists(self, key="mal_ID"):
 		"""
-		Sort lists for easier comparision.
+		Sort lists for easier comparision.\n
 		Called by default on initializing the class.
 		Mutilates the lists.
 		"""
@@ -49,16 +49,8 @@ class APIHandler:
 
 	def _equalize_lists(self, format=False):
 		"""
-		Equalize both lists sp that they are easy to compare.
-		This is called by _stage_changes() so that it can figure out
-		which list has been modified. 
-
-		This does NOT mutilate the adList and tList, as it is called
-		inside a function and does not need global vars.
-
-		It returns a list with 2 sublists, the AD list first, then Trackma.
-		It also returns they keys of both lists in the Trackma format.
-		Specify format to be false to return in the animedl format.
+		Strips both the lists to the common categories and returns it
+		as two sublists with the AD list being first.
 		"""
 		tempList = [[], []]
 
@@ -74,12 +66,9 @@ class APIHandler:
 
 	def _stage_changes(self, preference=True):
 		"""
-		Returns the modified items in the AD list.
-		This is called by add_staged_to_trackma().
-
-		Compares to the Trackma list and gives
-		preference to the Trackma entry, to reverse this
-		set parameter preference to False.
+		Returns the modified items in the AD list.\n
+		Replaces it with the Trackma entry, to reverse this
+		set preference to False.
 		"""
 		(sadList, stList) = self._equalize_lists()
 		tempList = []
@@ -90,11 +79,9 @@ class APIHandler:
 	
 	def add_staged_to_trackma(self, qList=None, all=False):
 		"""
-		Updates the Trackma queue with the modified items from _stage_changes.
-		Doesn
-
-		You can provide your own list with the qList parameter.
-		You can also send your entire AD list by setting all to True.
+		Updates the Trackma queue.\n
+		Provide your own list with the qList parameter.
+		Send your entire AD list by setting all to True.
 		"""
 		if qList:
 			pass
@@ -143,4 +130,4 @@ class APIHandler:
 	"""
 
 api = APIHandler()
-print(api._equalize_lists())
+print(api._stage_changes())
