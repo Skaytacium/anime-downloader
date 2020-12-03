@@ -1,6 +1,7 @@
 from trackma.engine import Engine
 from trackma.accounts import AccountManager
 from anime_downloader.watch import Watcher
+
 import json
 
 class APIHandler:
@@ -16,15 +17,21 @@ class APIHandler:
         "score": "my_score",
         "_len": "total"
     }
-    watch = Watcher()
-    accs = AccountManager().get_accounts()
-    main = Engine(list(accs)[0][1])
+    watch = None
+    accs = None
+    engine = None
+    adList = []
+    tList = []
 
     def __init__(self):
-        main.start()
-        self.tList = list(main.get_list())
+        watch = Watcher()
+        accs = AccountManager().get_accounts()
+        print(accs)
+        engine = accs
+        engine.start()
+        self.tList = list(engine.get_list())
         with open(watch.WATCH_FILE, 'r') as watch_file:
-            adList = list(json.load(watch_file))
+            self.adList = list(json.load(watch_file))
 
     def sort_lists(self, key="mal_ID"): 
         self.adList.sort(key=lambda val: val[key])
@@ -35,12 +42,12 @@ class APIHandler:
     
     def stage_changes(self):
         for i in range(len(tList)):
-            if (adList[i]["mal_ID"] != tList[i]["id"]):
-                print(main.get_show_info(showid=adList[i]["mal_ID"]))
-                main.add_show()
+            if (self.adList[i]["mal_ID"] != self.tList[i]["id"]):
+                print(self.engine.get_show_info(showid=self.adList[i]["mal_ID"]))
+                self.engine.add_show()
                 break
     """
-    Trackma List main
+    Trackma List
     {
         'id': 24833, 
         'title': 'Ansatsu Kyoushitsu', 
